@@ -39,7 +39,7 @@ public class UsuarioController : ControllerBase
         byte[] stringBytes = Encoding.ASCII.GetBytes(password);
         byte[] byteArray = hasher.ComputeHash(stringBytes);
 
-        StringBuilder stringBuilder = new StringBuilder();
+        StringBuilder stringBuilder = new();
         foreach (byte b in byteArray)
         {
             stringBuilder.AppendFormat("{0:x2}", b);
@@ -85,5 +85,19 @@ public class UsuarioController : ControllerBase
         {
             return BadRequest("Erro geral");
         }
+    }
+
+    [HttpGet("obterporemail/{email}")]
+    public async Task<ActionResult> ObterPorEmail([FromRoute] string email)
+    {
+        if (await context.Usuarios.AnyAsync(p => p.Email == email))
+        {
+            Usuario? user = await context.Usuarios.FirstOrDefaultAsync(p => p.Email == email);
+            if (user != null)
+                user.Senha = "";
+            return Ok(user);
+        }
+        else
+            return BadRequest("Usuário não encontrado");
     }
 }
